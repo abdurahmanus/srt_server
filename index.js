@@ -4,10 +4,11 @@ const cors = require('cors')
 const multer = require('multer')
 const { StringDecoder } = require('string_decoder')
 const parse = require('./parser')
+const { translateWord } = require('./translator')
 
 const app = express()
 const upload = multer()
-const decoder = new StringDecoder('utf8');
+const decoder = new StringDecoder('utf8')
 
 // setup cors
 const whitelist = process.env.WHITELIST ? process.env.WHITELIST.split(',') : []
@@ -25,9 +26,16 @@ app.use(cors(corsOptions))
 
 app.post('/upload', upload.single('srt'), function (req, res, next) {
     const srt = decoder.write(req.file.buffer)
-    const result = parse(srt, "data/stop.txt");
+    const result = parse(srt, "data/stop.txt")
     res.json(result)
-});
+})
+
+app.get('/translate/:word', function(req, res) {
+    const word = req.params.word
+    translateWord(word).then(result => {
+        res.json(result)
+    })
+})
 
 const port = process.env.PORT || 3000
 app.listen(port, function() {
